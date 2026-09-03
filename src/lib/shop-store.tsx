@@ -84,8 +84,8 @@ export function ShopProvider({ children }: { children: ReactNode }) {
 
   const addToCart = useCallback(
     (product: Product, size?: string, color?: string, qty = 1) => {
-      const chosenSize = size ?? product.sizes[0];
-      const chosenColor = color ?? product.colors[0].name;
+      const chosenSize = size ?? product.sizes[0] ?? "One Size";
+      const chosenColor = color ?? product.colors[0]?.name ?? "Core Black";
       setCart((prev) => {
         const index = prev.findIndex(
           (l) =>
@@ -93,13 +93,15 @@ export function ShopProvider({ children }: { children: ReactNode }) {
             l.size === chosenSize &&
             l.color === chosenColor,
         );
-        if (index >= 0) {
+        const existing = index >= 0 ? prev[index] : undefined;
+        if (existing) {
           const next = [...prev];
-          next[index] = { ...next[index], qty: next[index].qty + qty };
+          next[index] = { ...existing, qty: existing.qty + qty };
           return next;
         }
         return [...prev, { slug: product.slug, size: chosenSize, color: chosenColor, qty }];
       });
+
       setCartOpen(true);
       toast.success(`${product.name} added to bag`, {
         description: `${chosenColor} · Size ${chosenSize}`,
